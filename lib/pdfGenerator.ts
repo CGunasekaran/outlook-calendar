@@ -86,21 +86,21 @@ function generateMonthCalendar(
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const firstDayOfWeek = getDay(monthStart);
 
-  const margin = 15;
-  const headerHeight = 25;
+  const margin = 10;
+  const headerHeight = 20;
   const calendarWidth = pageWidth - 2 * margin;
   const calendarHeight = pageHeight - headerHeight - 2 * margin;
 
   // Month and year header
-  doc.setFontSize(20);
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   const monthTitle = `${monthNames[month]} ${year}`;
   const titleWidth = doc.getTextWidth(monthTitle);
-  doc.text(monthTitle, (pageWidth - titleWidth) / 2, margin + 15);
+  doc.text(monthTitle, (pageWidth - titleWidth) / 2, margin + 12);
 
-  // Calendar grid with larger cells to fit all events
-  const cellWidth = calendarWidth / 7;
-  const cellHeight = (calendarHeight / 6) * 1.4; // Increase cell height by 40%
+  // Ultra-compact calendar grid for complete monthly view
+  const cellWidth = (calendarWidth - 6) / 7; // Reduce width with minimal gaps
+  const cellHeight = (calendarHeight - 18) / 7; // Reduce height with minimal spacing
   const startX = margin;
   const startY = margin + headerHeight;
 
@@ -131,25 +131,17 @@ function generateMonthCalendar(
     );
   }
 
-  // Day headers
-  const dayHeaders = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  doc.setFontSize(11);
+  // Compact day headers
+  const dayHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(100, 100, 100);
+  doc.setTextColor(80, 80, 80);
 
   dayHeaders.forEach((day, index) => {
     const x = startX + index * cellWidth + cellWidth / 2;
     const y = startY + cellHeight / 2;
     const textWidth = doc.getTextWidth(day);
-    doc.text(day, x - textWidth / 2, y + 2);
+    doc.text(day, x - textWidth / 2, y + 1);
   });
 
   // Draw calendar days
@@ -202,39 +194,49 @@ function generateMonthCalendar(
       doc.setFont("helvetica", isWeekendDay ? "normal" : "bold");
     }
 
-    doc.text(dayNumber, x + 3, y + 10);
+    doc.text(dayNumber, x + 1.5, y + 7);
 
     if (dayEvents.length > 0) {
-      doc.setFontSize(5.5);
+      doc.setFontSize(4);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(0, 0, 100);
 
-      // Show ALL events - no limitation
-      const eventLineHeight = 4.5;
+      // Ultra-compact event display - show ALL events with minimal spacing
+      const eventLineHeight = 3;
+      const availableHeight = cellHeight - 9; // Reduced space after day number
+      const maxEvents = Math.floor(availableHeight / eventLineHeight);
 
-      dayEvents.forEach((event, eventIndex) => {
-        const eventY = y + 13 + eventIndex * eventLineHeight;
+      dayEvents.slice(0, maxEvents).forEach((event, eventIndex) => {
+        const eventY = y + 9.5 + eventIndex * eventLineHeight;
         let eventText = event.ruleName;
 
-        // Smart text truncation to fit cell width while preserving readability
-        const maxTextWidth = cellWidth - 4;
+        // Ultra-aggressive text truncation for ultra-compact display
+        const maxTextWidth = cellWidth - 2.5;
         while (
           doc.getTextWidth(eventText) > maxTextWidth &&
-          eventText.length > 8
+          eventText.length > 4
         ) {
           eventText = eventText.substring(0, eventText.length - 1);
         }
 
-        // Add ellipsis only if significantly truncated
-        if (eventText.length < event.ruleName.length - 3) {
-          eventText = eventText.substring(0, eventText.length - 2) + "..";
+        // Minimal ellipsis for truncated text
+        if (eventText.length < event.ruleName.length - 2) {
+          eventText = eventText.substring(0, eventText.length - 1) + ".";
         }
 
-        // Render all events within the enlarged cell
-        if (eventY + 3 < y + cellHeight) {
-          doc.text(eventText, x + 2, eventY);
+        // Render events with ultra-compact spacing
+        if (eventY + 1.5 < y + cellHeight) {
+          doc.text(eventText, x + 1, eventY);
         }
       });
+
+      // Show count if there are more events than can fit
+      if (dayEvents.length > maxEvents) {
+        const remainingY = y + cellHeight - 2.5;
+        doc.setFontSize(3);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`+${dayEvents.length - maxEvents}`, x + 1, remainingY);
+      }
     }
 
     // Move to next cell
