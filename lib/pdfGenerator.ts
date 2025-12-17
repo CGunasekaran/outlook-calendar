@@ -204,16 +204,16 @@ function generateMonthCalendar(
       // Dynamic sizing to fit ALL events in the cell
       const availableHeight = cellHeight - 15; // Space after day number
       const numEvents = dayEvents.length;
-      
+
       // Calculate optimal font size and line height to fit all events
       let fontSize = 6;
       let lineHeight = 5;
-      
+
       if (numEvents > 3) {
         fontSize = Math.max(3.5, 6 - (numEvents - 3) * 0.3);
         lineHeight = Math.max(3, 5 - (numEvents - 3) * 0.2);
       }
-      
+
       // Ensure all events fit within available height
       const totalNeededHeight = numEvents * lineHeight;
       if (totalNeededHeight > availableHeight) {
