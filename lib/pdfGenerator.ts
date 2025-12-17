@@ -209,19 +209,27 @@ function generateMonthCalendar(
       // Calculate available space for events (cell height - day number space - padding)
       const availableEventHeight = cellHeight - 15; // Leave space for day number and padding
       const eventLineHeight = 5;
-      const maxEventsInCell = Math.floor(availableEventHeight / eventLineHeight);
-      const eventsToShow = Math.min(dayEvents.length, maxEventsInCell - (dayEvents.length > maxEventsInCell ? 1 : 0));
+      const maxEventsInCell = Math.floor(
+        availableEventHeight / eventLineHeight
+      );
+      const eventsToShow = Math.min(
+        dayEvents.length,
+        maxEventsInCell - (dayEvents.length > maxEventsInCell ? 1 : 0)
+      );
 
       dayEvents.slice(0, eventsToShow).forEach((event, eventIndex) => {
-        const eventY = y + 14 + (eventIndex * eventLineHeight);
+        const eventY = y + 14 + eventIndex * eventLineHeight;
         let eventText = event.ruleName;
 
         // More aggressive text truncation to fit cell width
         const maxTextWidth = cellWidth - 4;
-        while (doc.getTextWidth(eventText) > maxTextWidth && eventText.length > 5) {
+        while (
+          doc.getTextWidth(eventText) > maxTextWidth &&
+          eventText.length > 5
+        ) {
           eventText = eventText.substring(0, eventText.length - 1);
         }
-        
+
         // Add ellipsis if text was truncated
         if (eventText.length < event.ruleName.length) {
           eventText = eventText.substring(0, eventText.length - 2) + "..";
@@ -235,11 +243,15 @@ function generateMonthCalendar(
 
       // Show "+" if more events than can fit
       if (dayEvents.length > eventsToShow) {
-        const moreTextY = y + 14 + (eventsToShow * eventLineHeight);
+        const moreTextY = y + 14 + eventsToShow * eventLineHeight;
         if (moreTextY + 3 < y + cellHeight) {
           doc.setTextColor(100, 100, 100);
           doc.setFontSize(5);
-          doc.text(`+${dayEvents.length - eventsToShow} more`, x + 2, moreTextY);
+          doc.text(
+            `+${dayEvents.length - eventsToShow} more`,
+            x + 2,
+            moreTextY
+          );
         }
       }
     }
