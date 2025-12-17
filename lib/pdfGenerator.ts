@@ -86,21 +86,21 @@ function generateMonthCalendar(
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const firstDayOfWeek = getDay(monthStart);
 
-  const margin = 10;
-  const headerHeight = 20;
+  const margin = 15;
+  const headerHeight = 25;
   const calendarWidth = pageWidth - 2 * margin;
   const calendarHeight = pageHeight - headerHeight - 2 * margin;
 
   // Month and year header
-  doc.setFontSize(16);
+  doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   const monthTitle = `${monthNames[month]} ${year}`;
   const titleWidth = doc.getTextWidth(monthTitle);
-  doc.text(monthTitle, (pageWidth - titleWidth) / 2, margin + 12);
+  doc.text(monthTitle, (pageWidth - titleWidth) / 2, margin + 15);
 
-  // Ultra-compact calendar grid for complete monthly view
-  const cellWidth = (calendarWidth - 6) / 7; // Reduce width with minimal gaps
-  const cellHeight = (calendarHeight - 18) / 7; // Reduce height with minimal spacing
+  // Expanded calendar grid with no gaps between cells
+  const cellWidth = calendarWidth / 7; // Full width utilization, no gaps
+  const cellHeight = calendarHeight / 7; // Full height utilization
   const startX = margin;
   const startY = margin + headerHeight;
 
@@ -131,11 +131,11 @@ function generateMonthCalendar(
     );
   }
 
-  // Compact day headers
+  // Enhanced day headers
   const dayHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  doc.setFontSize(9);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(80, 80, 80);
+  doc.setTextColor(60, 60, 60);
 
   dayHeaders.forEach((day, index) => {
     const x = startX + index * cellWidth + cellWidth / 2;
@@ -194,49 +194,60 @@ function generateMonthCalendar(
       doc.setFont("helvetica", isWeekendDay ? "normal" : "bold");
     }
 
-    doc.text(dayNumber, x + 1.5, y + 7);
+    doc.setFontSize(10);
+    doc.text(dayNumber, x + 3, y + 10);
 
     if (dayEvents.length > 0) {
-      doc.setFontSize(4);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(0, 0, 100);
 
-      // Ultra-compact event display - show ALL events with minimal spacing
-      const eventLineHeight = 3;
-      const availableHeight = cellHeight - 9; // Reduced space after day number
-      const maxEvents = Math.floor(availableHeight / eventLineHeight);
+      // Dynamic sizing to fit ALL events in the cell
+      const availableHeight = cellHeight - 15; // Space after day number
+      const numEvents = dayEvents.length;
+      
+      // Calculate optimal font size and line height to fit all events
+      let fontSize = 6;
+      let lineHeight = 5;
+      
+      if (numEvents > 3) {
+        fontSize = Math.max(3.5, 6 - (numEvents - 3) * 0.3);
+        lineHeight = Math.max(3, 5 - (numEvents - 3) * 0.2);
+      }
+      
+      // Ensure all events fit within available height
+      const totalNeededHeight = numEvents * lineHeight;
+      if (totalNeededHeight > availableHeight) {
+        const scaleFactor = availableHeight / totalNeededHeight;
+        fontSize = Math.max(3, fontSize * scaleFactor);
+        lineHeight = Math.max(2.5, lineHeight * scaleFactor);
+      }
 
-      dayEvents.slice(0, maxEvents).forEach((event, eventIndex) => {
-        const eventY = y + 9.5 + eventIndex * eventLineHeight;
+      doc.setFontSize(fontSize);
+
+      // Display ALL events - no "+X more" indicators
+      dayEvents.forEach((event, eventIndex) => {
+        const eventY = y + 14 + eventIndex * lineHeight;
         let eventText = event.ruleName;
 
-        // Ultra-aggressive text truncation for ultra-compact display
-        const maxTextWidth = cellWidth - 2.5;
+        // Text truncation based on available width
+        const maxTextWidth = cellWidth - 4;
         while (
           doc.getTextWidth(eventText) > maxTextWidth &&
-          eventText.length > 4
+          eventText.length > 3
         ) {
           eventText = eventText.substring(0, eventText.length - 1);
         }
 
-        // Minimal ellipsis for truncated text
-        if (eventText.length < event.ruleName.length - 2) {
+        // Add minimal ellipsis only if significantly truncated
+        if (eventText.length < event.ruleName.length - 3) {
           eventText = eventText.substring(0, eventText.length - 1) + ".";
         }
 
-        // Render events with ultra-compact spacing
-        if (eventY + 1.5 < y + cellHeight) {
-          doc.text(eventText, x + 1, eventY);
+        // Render all events within cell bounds
+        if (eventY + lineHeight * 0.8 < y + cellHeight) {
+          doc.text(eventText, x + 2, eventY);
         }
       });
-
-      // Show count if there are more events than can fit
-      if (dayEvents.length > maxEvents) {
-        const remainingY = y + cellHeight - 2.5;
-        doc.setFontSize(3);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`+${dayEvents.length - maxEvents}`, x + 1, remainingY);
-      }
     }
 
     // Move to next cell
