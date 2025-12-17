@@ -1,22 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Business Calendar Generator
 
-## Getting Started
+A comprehensive web application for generating business calendars with automatic event scheduling, PDF export, CSV export, and Outlook calendar integration.
 
-First, run the development server:
+## 🚀 Features
+
+### ✨ **Smart Event Management**
+- **Editable Text Interface**: Simple textarea for defining business events
+- **Intelligent Date Parsing**: Automatically handles complex scheduling rules
+- **Weekend Logic**: Smart handling of weekends with "next working day" and "previous Friday" rules
+- **Pre-loaded Events**: Comes with common business events (monthend, allocations, etc.)
+
+### 📅 **Calendar Display**
+- **12-Month View**: Complete yearly calendar with responsive grid layout
+- **Visual Event Indicators**: Color-coded events with clear date highlighting
+- **Event Details**: Hover tooltips showing full event information
+- **Professional Design**: Clean, readable calendar layout
+
+### 📊 **Export Options**
+1. **📄 PDF Calendar**: Professional calendar with visual event differentiation
+2. **📊 CSV Export**: Structured data export for analysis
+3. **📅 Outlook Integration**: .ics file generation for calendar imports
+
+### 🎯 **Outlook Calendar Integration**
+- **Automatic Import**: One-click .ics file download
+- **Smart Reminders**: 1-day advance notifications for all events
+- **Professional Formatting**: Proper event categorization and metadata
+- **Universal Compatibility**: Works with Outlook, Apple Calendar, Google Calendar
+
+## 🛠️ **Getting Started**
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation & Running
 
 ```bash
+# Clone the repository
+git clone https://github.com/CGunasekaran/outlook-calendar.git
+cd outlook-calendar
+
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
