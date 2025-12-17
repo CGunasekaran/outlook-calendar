@@ -22,8 +22,10 @@ NA F&V allocations - 15th of every month, no holiday shifting
 EU F&V allocations - 19th of every month, no holiday shifting
 IMG Allocations and adjustments - 15th of every month, no holiday shifting
 EU cost corrections - runs every 9th, if 9th is weekend it runs on the previous Friday
-Money currency update - first of every month
-EU Dealer price extract - 1st of every month`;
+Monex currency update - first of every month
+EU Dealer price extract - 1st of every month
+EU Yearly At Constant - 9th of first month
+EU Yearly Budget Rate - 23rd of first month`;
 
 export default function UserInputForm({
   onFormSubmit,

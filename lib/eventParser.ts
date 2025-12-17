@@ -70,13 +70,25 @@ function calculateEventDate(
       return new Date(year, month, 2);
     }
 
-    // 9th with weekend handling
-    if (ruleLower.includes("9th") && ruleLower.includes("previous friday")) {
+    // 9th with weekend handling (runs every 9th or previous Friday)
+    if (
+      (ruleLower.includes("9th") || ruleLower.includes("every 9th")) &&
+      ruleLower.includes("previous friday")
+    ) {
       const date = new Date(year, month, 9);
       if (isWeekend(date)) {
         return getPreviousFriday(date);
       }
       return date;
+    }
+
+    // Plain 9th without weekend shifting
+    if (
+      ruleLower.includes("9th") &&
+      !ruleLower.includes("previous friday") &&
+      !ruleLower.includes("first month")
+    ) {
+      return new Date(year, month, 9);
     }
 
     // 12th with weekend handling
@@ -105,6 +117,50 @@ function calculateEventDate(
     // 19th (no shifting)
     if (ruleLower.includes("19th")) {
       return new Date(year, month, 19);
+    }
+
+    // January-only events
+    if (
+      ruleLower.includes("first month") ||
+      ruleLower.includes("only in january")
+    ) {
+      if (month === 0) {
+        // January
+        if (ruleLower.includes("9th") || ruleLower.includes("9 ")) {
+          return new Date(year, month, 9);
+        }
+        if (ruleLower.includes("23rd") || ruleLower.includes("23 ")) {
+          return new Date(year, month, 23);
+        }
+      }
+      return null; // Skip for other months
+    }
+
+    // General day patterns with "of every month" or "every [day]"
+    const dayMatch =
+      ruleLower.match(/(\d+)(?:st|nd|rd|th)?\s+of\s+every\s+month/) ||
+      ruleLower.match(/every\s+(\d+)(?:st|nd|rd|th)?/);
+    if (dayMatch) {
+      const day = parseInt(dayMatch[1]);
+      if (day >= 1 && day <= 31) {
+        return new Date(year, month, day);
+      }
+    }
+
+    // Catch "runs every" patterns
+    if (ruleLower.includes("runs every")) {
+      const runsDayMatch = ruleLower.match(/runs every (\d+)(?:st|nd|rd|th)?/);
+      if (runsDayMatch) {
+        const day = parseInt(runsDayMatch[1]);
+        if (day >= 1 && day <= 31) {
+          const date = new Date(year, month, day);
+          // Apply weekend shifting if mentioned
+          if (ruleLower.includes("previous friday") && isWeekend(date)) {
+            return getPreviousFriday(date);
+          }
+          return date;
+        }
+      }
     }
 
     return null;
