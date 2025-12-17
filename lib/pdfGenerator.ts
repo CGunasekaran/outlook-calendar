@@ -110,7 +110,7 @@ function generateMonthCalendar(
 
   // Calculate total grid height with new cell dimensions
   const totalGridHeight = 7 * cellHeight; // 6 weeks + header row
-  
+
   // Vertical lines
   for (let i = 0; i <= 7; i++) {
     doc.line(
@@ -211,7 +211,7 @@ function generateMonthCalendar(
 
       // Show ALL events - no limitation
       const eventLineHeight = 4.5;
-      
+
       dayEvents.forEach((event, eventIndex) => {
         const eventY = y + 13 + eventIndex * eventLineHeight;
         let eventText = event.ruleName;
