@@ -202,32 +202,45 @@ function generateMonthCalendar(
     doc.text(dayNumber, x + 3, y + 10);
 
     if (dayEvents.length > 0) {
-      doc.setFontSize(7);
+      doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(0, 0, 100);
 
-      dayEvents.slice(0, 4).forEach((event, eventIndex) => {
-        const eventY = y + 15 + eventIndex * 6;
+      // Calculate available space for events (cell height - day number space - padding)
+      const availableEventHeight = cellHeight - 15; // Leave space for day number and padding
+      const eventLineHeight = 5;
+      const maxEventsInCell = Math.floor(availableEventHeight / eventLineHeight);
+      const eventsToShow = Math.min(dayEvents.length, maxEventsInCell - (dayEvents.length > maxEventsInCell ? 1 : 0));
+
+      dayEvents.slice(0, eventsToShow).forEach((event, eventIndex) => {
+        const eventY = y + 14 + (eventIndex * eventLineHeight);
         let eventText = event.ruleName;
 
-        // Truncate text to fit cell
-        while (
-          doc.getTextWidth(eventText) > cellWidth - 6 &&
-          eventText.length > 3
-        ) {
+        // More aggressive text truncation to fit cell width
+        const maxTextWidth = cellWidth - 4;
+        while (doc.getTextWidth(eventText) > maxTextWidth && eventText.length > 5) {
           eventText = eventText.substring(0, eventText.length - 1);
         }
-        if (eventText !== event.ruleName) {
-          eventText += "...";
+        
+        // Add ellipsis if text was truncated
+        if (eventText.length < event.ruleName.length) {
+          eventText = eventText.substring(0, eventText.length - 2) + "..";
         }
 
-        doc.text(eventText, x + 2, eventY);
+        // Ensure event text stays within cell boundaries
+        if (eventY + 3 < y + cellHeight) {
+          doc.text(eventText, x + 2, eventY);
+        }
       });
 
-      // Show "+" if more events
-      if (dayEvents.length > 4) {
-        doc.setTextColor(100, 100, 100);
-        doc.text(`+${dayEvents.length - 4} more`, x + 2, y + cellHeight - 5);
+      // Show "+" if more events than can fit
+      if (dayEvents.length > eventsToShow) {
+        const moreTextY = y + 14 + (eventsToShow * eventLineHeight);
+        if (moreTextY + 3 < y + cellHeight) {
+          doc.setTextColor(100, 100, 100);
+          doc.setFontSize(5);
+          doc.text(`+${dayEvents.length - eventsToShow} more`, x + 2, moreTextY);
+        }
       }
     }
 
