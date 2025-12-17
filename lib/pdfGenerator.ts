@@ -98,9 +98,9 @@ function generateMonthCalendar(
   const titleWidth = doc.getTextWidth(monthTitle);
   doc.text(monthTitle, (pageWidth - titleWidth) / 2, margin + 15);
 
-  // Calendar grid
+  // Calendar grid with larger cells to fit all events
   const cellWidth = calendarWidth / 7;
-  const cellHeight = calendarHeight / 7; // 6 weeks + header
+  const cellHeight = (calendarHeight / 6) * 1.4; // Increase cell height by 40%
   const startX = margin;
   const startY = margin + headerHeight;
 
@@ -108,18 +108,21 @@ function generateMonthCalendar(
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
 
+  // Calculate total grid height with new cell dimensions
+  const totalGridHeight = 7 * cellHeight; // 6 weeks + header row
+  
   // Vertical lines
   for (let i = 0; i <= 7; i++) {
     doc.line(
       startX + i * cellWidth,
       startY,
       startX + i * cellWidth,
-      startY + 6 * cellHeight
+      startY + totalGridHeight
     );
   }
 
-  // Horizontal lines
-  for (let i = 0; i <= 6; i++) {
+  // Horizontal lines (7 lines for header + 6 weeks)
+  for (let i = 0; i <= 7; i++) {
     doc.line(
       startX,
       startY + i * cellHeight,
@@ -202,58 +205,36 @@ function generateMonthCalendar(
     doc.text(dayNumber, x + 3, y + 10);
 
     if (dayEvents.length > 0) {
-      doc.setFontSize(6);
+      doc.setFontSize(5.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(0, 0, 100);
 
-      // Calculate available space for events (cell height - day number space - padding)
-      const availableEventHeight = cellHeight - 15; // Leave space for day number and padding
-      const eventLineHeight = 5;
-      const maxEventsInCell = Math.floor(
-        availableEventHeight / eventLineHeight
-      );
-      const eventsToShow = Math.min(
-        dayEvents.length,
-        maxEventsInCell - (dayEvents.length > maxEventsInCell ? 1 : 0)
-      );
-
-      dayEvents.slice(0, eventsToShow).forEach((event, eventIndex) => {
-        const eventY = y + 14 + eventIndex * eventLineHeight;
+      // Show ALL events - no limitation
+      const eventLineHeight = 4.5;
+      
+      dayEvents.forEach((event, eventIndex) => {
+        const eventY = y + 13 + eventIndex * eventLineHeight;
         let eventText = event.ruleName;
 
-        // More aggressive text truncation to fit cell width
+        // Smart text truncation to fit cell width while preserving readability
         const maxTextWidth = cellWidth - 4;
         while (
           doc.getTextWidth(eventText) > maxTextWidth &&
-          eventText.length > 5
+          eventText.length > 8
         ) {
           eventText = eventText.substring(0, eventText.length - 1);
         }
 
-        // Add ellipsis if text was truncated
-        if (eventText.length < event.ruleName.length) {
+        // Add ellipsis only if significantly truncated
+        if (eventText.length < event.ruleName.length - 3) {
           eventText = eventText.substring(0, eventText.length - 2) + "..";
         }
 
-        // Ensure event text stays within cell boundaries
+        // Render all events within the enlarged cell
         if (eventY + 3 < y + cellHeight) {
           doc.text(eventText, x + 2, eventY);
         }
       });
-
-      // Show "+" if more events than can fit
-      if (dayEvents.length > eventsToShow) {
-        const moreTextY = y + 14 + eventsToShow * eventLineHeight;
-        if (moreTextY + 3 < y + cellHeight) {
-          doc.setTextColor(100, 100, 100);
-          doc.setFontSize(5);
-          doc.text(
-            `+${dayEvents.length - eventsToShow} more`,
-            x + 2,
-            moreTextY
-          );
-        }
-      }
     }
 
     // Move to next cell
