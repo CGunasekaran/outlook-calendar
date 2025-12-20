@@ -24,7 +24,7 @@ export function generatePDF(
   // Title page
   doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
-  const title = `IBIS ${year} Production Calendar`;
+  const title = `${year} Production Calendar`;
   const titleWidth = doc.getTextWidth(title);
   doc.text(title, (pageWidth - titleWidth) / 2, pageHeight / 2 - 20);
 
@@ -333,4 +333,43 @@ function generateEventsSummary(
 
     yPosition += 5;
   }
+}
+
+// Export function to generate PDF as blob for preview
+export function generatePDFBlob(
+  events: CalendarEvent[],
+  year: number,
+  formData?: FormData
+): Blob {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape orientation for calendar layout
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Title page
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  const title = `${year} Production Calendar`;
+  const titleWidth = doc.getTextWidth(title);
+  doc.text(title, (pageWidth - titleWidth) / 2, pageHeight / 2 - 20);
+
+  // Add subtitle
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "normal");
+  const subtitle = `Generated ${format(new Date(), "PPP")}`;
+  const subtitleWidth = doc.getTextWidth(subtitle);
+  doc.text(subtitle, (pageWidth - subtitleWidth) / 2, pageHeight / 2);
+
+  // Generate calendar pages
+  for (let month = 0; month < 12; month++) {
+    doc.addPage();
+    generateMonthCalendar(doc, month, year, events, pageWidth, pageHeight);
+  }
+
+  // Generate events list
+  doc.addPage();
+  generateEventsSummary(doc, events, year, pageWidth, pageHeight);
+
+  // Return PDF as blob instead of downloading
+  return doc.output("blob");
 }
