@@ -1,25 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #ff6b6b 50%, #4ecdc4 75%, #45b7d1 100%);
+  --background-light: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #ff8a80 50%, #7986cb 75%, #64b5f6 100%);
+  --background-alt: linear-gradient(135deg, #74b9ff 0%, #0984e3 25%, #a29bfe 50%, #fd79a8 75%, #fdcb6e 100%);
+  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b6b 100%);
+  --foreground: #1a1a1a;
+  --foreground-light: #ffffff;
+  --card-background: rgba(255, 255, 255, 0.15);
+  --card-border: rgba(255, 255, 255, 0.25);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: linear-gradient(135deg, #2c3e50 0%, #3498db 25%, #9b59b6 50%, #e74c3c 75%, #1abc9c 100%);
+    --background-light: linear-gradient(135deg, #34495e 0%, #5dade2 25%, #bb8fce 50%, #ec7063 75%, #58d68d 100%);
+    --background-alt: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #8e44ad 50%, #c0392b 75%, #16a085 100%);
+    --accent-gradient: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+    --foreground: #ffffff;
+    --foreground-light: #f8f9fa;
+    --card-background: rgba(255, 255, 255, 0.12);
+    --card-border: rgba(255, 255, 255, 0.18);
   }
 }
 
 body {
   background: var(--background);
+  background-attachment: fixed;
+  min-height: 100vh;
   color: var(--foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Static floating particles effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -32,6 +64,52 @@ h1, h2, h3, h4, h5, h6 {
 button, input, select, textarea {
   font-family: inherit;
   font-weight: 500;
+}
+
+/* Modern glass effect for cards */
+.glass-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: var(--card-background);
+  border: 1px solid var(--card-border);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 
+    0 12px 40px 0 rgba(31, 38, 135, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Static gradient text effect */
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Ensure calendar text is crisp and readable */

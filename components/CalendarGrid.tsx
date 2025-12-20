@@ -43,8 +43,8 @@ export default function CalendarGrid({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 calendar-text">
-      <h3 className="text-xl font-bold text-center mb-4 text-gray-800">
+    <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl shadow-xl p-4 calendar-text">
+      <h3 className="text-xl font-bold text-center mb-4 text-white">
         {monthName}
       </h3>
 
@@ -52,7 +52,7 @@ export default function CalendarGrid({
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
-            className="text-center font-semibold text-sm text-gray-700 p-2 bg-gray-100 rounded-t"
+            className="text-center font-semibold text-sm text-white p-2 bg-white/20 rounded-t"
           >
             {day}
           </div>
@@ -71,19 +71,19 @@ export default function CalendarGrid({
           return (
             <div
               key={day.toString()}
-              className={`min-h-[90px] p-2 border rounded transition-colors ${
-                isWeekend ? "bg-gray-50" : "bg-white"
+              className={`min-h-[90px] p-2 border rounded-lg transition-colors ${
+                isWeekend ? "bg-white/5" : "bg-white/10"
               } ${
                 isToday
-                  ? "border-red-400 bg-red-50"
+                  ? "border-red-400 bg-red-500/20"
                   : dayEvents.length > 0
                   ? "border-blue-400"
-                  : "border-gray-200"
-              } hover:shadow-sm`}
+                  : "border-white/30"
+              } hover:shadow-sm backdrop-blur-sm`}
             >
               <div
                 className={`font-semibold text-sm mb-1 ${
-                  isToday ? "text-red-600" : "text-gray-900"
+                  isToday ? "text-red-300" : "text-white"
                 }`}
               >
                 {format(day, "d")}
