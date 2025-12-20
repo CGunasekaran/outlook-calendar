@@ -1,0 +1,21 @@
+# This file defines code owners for the repository
+# Code owners are automatically requested for review when someone opens a pull request that modifies code that they own
+# Only the code owner(s) can approve changes to their owned code
+
+# Global code owner - all files and directories
+* @CGunasekaran
+
+# Specific ownership for important configuration files
+package.json @CGunasekaran
+tsconfig.json @CGunasekaran
+next.config.ts @CGunasekaran
+.gitignore @CGunasekaran
+
+# Application source code
+/app/ @CGunasekaran
+/components/ @CGunasekaran
+/lib/ @CGunasekaran
+/types/ @CGunasekaran
+
+# Documentation
+README.md @CGunasekaran
