@@ -65,18 +65,43 @@ function parseEventRule(
 
     // Specific day of week patterns
     const dayOfWeekPatterns = [
-      "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
-      "mondays", "tuesdays", "wednesdays", "thursdays", "fridays", "saturdays", "sundays"
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+      "mondays",
+      "tuesdays",
+      "wednesdays",
+      "thursdays",
+      "fridays",
+      "saturdays",
+      "sundays",
     ];
-    
+
     for (const dayPattern of dayOfWeekPatterns) {
-      if (rule.includes(`every ${dayPattern}`) || rule.includes(`all ${dayPattern}`)) {
-        return generateDayOfWeekEvents(parsedEvent, year, month, index, dayPattern);
+      if (
+        rule.includes(`every ${dayPattern}`) ||
+        rule.includes(`all ${dayPattern}`)
+      ) {
+        return generateDayOfWeekEvents(
+          parsedEvent,
+          year,
+          month,
+          index,
+          dayPattern
+        );
       }
     }
 
     // Bi-weekly patterns
-    if (rule.includes("bi-weekly") || rule.includes("biweekly") || rule.includes("every two weeks")) {
+    if (
+      rule.includes("bi-weekly") ||
+      rule.includes("biweekly") ||
+      rule.includes("every two weeks")
+    ) {
       return generateBiWeeklyEvents(parsedEvent, year, month, index);
     }
 
@@ -86,12 +111,20 @@ function parseEventRule(
     }
 
     // Semi-annual patterns
-    if (rule.includes("semi-annual") || rule.includes("twice a year") || rule.includes("every 6 months")) {
+    if (
+      rule.includes("semi-annual") ||
+      rule.includes("twice a year") ||
+      rule.includes("every 6 months")
+    ) {
       return generateSemiAnnualEvents(parsedEvent, year, month, index);
     }
 
     // Annual patterns
-    if (rule.includes("annually") || rule.includes("yearly") || rule.includes("once a year")) {
+    if (
+      rule.includes("annually") ||
+      rule.includes("yearly") ||
+      rule.includes("once a year")
+    ) {
       return generateAnnualEvents(parsedEvent, year, month, index);
     }
 
@@ -101,13 +134,26 @@ function parseEventRule(
     }
 
     // First/Second/Third/Fourth/Last occurrence of a day
-    const ordinalMatches = rule.match(/(first|second|third|fourth|last)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/);
+    const ordinalMatches = rule.match(
+      /(first|second|third|fourth|last)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
+    );
     if (ordinalMatches) {
-      return generateOrdinalDayEvents(parsedEvent, year, month, index, ordinalMatches[1], ordinalMatches[2]);
+      return generateOrdinalDayEvents(
+        parsedEvent,
+        year,
+        month,
+        index,
+        ordinalMatches[1],
+        ordinalMatches[2]
+      );
     }
 
     // Business days patterns
-    if (rule.includes("business day") || rule.includes("weekday") || rule.includes("working day")) {
+    if (
+      rule.includes("business day") ||
+      rule.includes("weekday") ||
+      rule.includes("working day")
+    ) {
       return generateBusinessDayEvents(parsedEvent, year, month, index);
     }
 
@@ -139,20 +185,22 @@ function generateDailyEvents(
 ): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const ruleLower = parsedEvent.rule.toLowerCase();
-  const excludeWeekends = ruleLower.includes("except weekends") || ruleLower.includes("weekdays only");
-  
+  const excludeWeekends =
+    ruleLower.includes("except weekends") ||
+    ruleLower.includes("weekdays only");
+
   // Get the number of days in the month
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
+
   // Generate events for each day of the month
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
-    
+
     // Skip weekends if specified
     if (excludeWeekends && isWeekend(date)) {
       continue;
     }
-    
+
     events.push({
       id: `${index}-${month}-${day}`,
       ruleName: parsedEvent.name,
@@ -162,7 +210,7 @@ function generateDailyEvents(
       notes: parsedEvent.description,
     });
   }
-  
+
   return events;
 }
 
@@ -174,27 +222,37 @@ function generateWeeklyEvents(
 ): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const ruleLower = parsedEvent.rule.toLowerCase();
-  
+
   // Default to Monday if no specific day is mentioned
   let targetDay = 1; // Monday
-  
+
   // Check for specific day mentions
-  const dayMatches = ruleLower.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/);
+  const dayMatches = ruleLower.match(
+    /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
+  );
   if (dayMatches) {
-    const dayMap = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
+    const dayMap = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+    };
     targetDay = dayMap[dayMatches[1] as keyof typeof dayMap];
   }
-  
+
   // Generate weekly events
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  
+
   // Find first occurrence of target day in month
   let currentDate = new Date(firstDay);
   while (currentDate.getDay() !== targetDay && currentDate <= lastDay) {
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   // Add weekly occurrences
   while (currentDate <= lastDay) {
     events.push({
@@ -207,7 +265,7 @@ function generateWeeklyEvents(
     });
     currentDate.setDate(currentDate.getDate() + 7);
   }
-  
+
   return events;
 }
 
@@ -219,26 +277,33 @@ function generateDayOfWeekEvents(
   dayPattern: string
 ): CalendarEvent[] {
   const events: CalendarEvent[] = [];
-  const dayMap = { 
-    'sunday': 0, 'sundays': 0,
-    'monday': 1, 'mondays': 1,
-    'tuesday': 2, 'tuesdays': 2,
-    'wednesday': 3, 'wednesdays': 3,
-    'thursday': 4, 'thursdays': 4,
-    'friday': 5, 'fridays': 5,
-    'saturday': 6, 'saturdays': 6
+  const dayMap = {
+    sunday: 0,
+    sundays: 0,
+    monday: 1,
+    mondays: 1,
+    tuesday: 2,
+    tuesdays: 2,
+    wednesday: 3,
+    wednesdays: 3,
+    thursday: 4,
+    thursdays: 4,
+    friday: 5,
+    fridays: 5,
+    saturday: 6,
+    saturdays: 6,
   };
-  
+
   const targetDay = dayMap[dayPattern as keyof typeof dayMap];
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  
+
   // Find first occurrence of target day in month
   let currentDate = new Date(firstDay);
   while (currentDate.getDay() !== targetDay && currentDate <= lastDay) {
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   // Add all occurrences of that day in the month
   while (currentDate <= lastDay) {
     events.push({
@@ -251,7 +316,7 @@ function generateDayOfWeekEvents(
     });
     currentDate.setDate(currentDate.getDate() + 7);
   }
-  
+
   return events;
 }
 
@@ -262,36 +327,40 @@ function generateMonthlyEvents(
   index: number
 ): CalendarEvent[] {
   const ruleLower = parsedEvent.rule.toLowerCase();
-  
+
   // Extract day number if specified
   const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?/);
   const day = dayMatch ? parseInt(dayMatch[1]) : 1;
-  
+
   // Handle "last day" specifically
   if (ruleLower.includes("last day")) {
     const lastDay = new Date(year, month + 1, 0).getDate();
-    return [{
-      id: `${index}-${month}`,
-      ruleName: parsedEvent.name,
-      date: new Date(year, month, lastDay),
-      month,
-      year,
-      notes: parsedEvent.description,
-    }];
+    return [
+      {
+        id: `${index}-${month}`,
+        ruleName: parsedEvent.name,
+        date: new Date(year, month, lastDay),
+        month,
+        year,
+        notes: parsedEvent.description,
+      },
+    ];
   }
-  
+
   // Regular monthly event on specified day
   if (day <= new Date(year, month + 1, 0).getDate()) {
-    return [{
-      id: `${index}-${month}`,
-      ruleName: parsedEvent.name,
-      date: new Date(year, month, day),
-      month,
-      year,
-      notes: parsedEvent.description,
-    }];
+    return [
+      {
+        id: `${index}-${month}`,
+        ruleName: parsedEvent.name,
+        date: new Date(year, month, day),
+        month,
+        year,
+        notes: parsedEvent.description,
+      },
+    ];
   }
-  
+
   return [];
 }
 
@@ -303,24 +372,34 @@ function generateBiWeeklyEvents(
 ): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const ruleLower = parsedEvent.rule.toLowerCase();
-  
+
   // Default to Monday if no specific day is mentioned
   let targetDay = 1;
-  const dayMatches = ruleLower.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/);
+  const dayMatches = ruleLower.match(
+    /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
+  );
   if (dayMatches) {
-    const dayMap = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
+    const dayMap = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+    };
     targetDay = dayMap[dayMatches[1] as keyof typeof dayMap];
   }
-  
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  
+
   // Find first occurrence of target day in month
   let currentDate = new Date(firstDay);
   while (currentDate.getDay() !== targetDay && currentDate <= lastDay) {
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   // Add bi-weekly occurrences (every 14 days)
   while (currentDate <= lastDay) {
     events.push({
@@ -333,7 +412,7 @@ function generateBiWeeklyEvents(
     });
     currentDate.setDate(currentDate.getDate() + 14);
   }
-  
+
   return events;
 }
 
@@ -345,10 +424,10 @@ function generateQuarterlyEvents(
 ): CalendarEvent[] {
   // Only generate events in quarter months (0, 3, 6, 9)
   if (month % 3 !== 0) return [];
-  
+
   const ruleLower = parsedEvent.rule.toLowerCase();
   let day = 1;
-  
+
   // Check for specific day
   const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?/);
   if (dayMatch) {
@@ -356,15 +435,17 @@ function generateQuarterlyEvents(
   } else if (ruleLower.includes("last day") || ruleLower.includes("end of")) {
     day = new Date(year, month + 1, 0).getDate();
   }
-  
-  return [{
-    id: `${index}-${month}`,
-    ruleName: parsedEvent.name,
-    date: new Date(year, month, day),
-    month,
-    year,
-    notes: parsedEvent.description,
-  }];
+
+  return [
+    {
+      id: `${index}-${month}`,
+      ruleName: parsedEvent.name,
+      date: new Date(year, month, day),
+      month,
+      year,
+      notes: parsedEvent.description,
+    },
+  ];
 }
 
 function generateSemiAnnualEvents(
@@ -375,25 +456,27 @@ function generateSemiAnnualEvents(
 ): CalendarEvent[] {
   // Only generate events in January (0) and July (6)
   if (month !== 0 && month !== 6) return [];
-  
+
   const ruleLower = parsedEvent.rule.toLowerCase();
   let day = 1;
-  
+
   const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?/);
   if (dayMatch) {
     day = parseInt(dayMatch[1]);
   } else if (ruleLower.includes("last day") || ruleLower.includes("end of")) {
     day = new Date(year, month + 1, 0).getDate();
   }
-  
-  return [{
-    id: `${index}-${month}`,
-    ruleName: parsedEvent.name,
-    date: new Date(year, month, day),
-    month,
-    year,
-    notes: parsedEvent.description,
-  }];
+
+  return [
+    {
+      id: `${index}-${month}`,
+      ruleName: parsedEvent.name,
+      date: new Date(year, month, day),
+      month,
+      year,
+      notes: parsedEvent.description,
+    },
+  ];
 }
 
 function generateAnnualEvents(
@@ -403,11 +486,23 @@ function generateAnnualEvents(
   index: number
 ): CalendarEvent[] {
   const ruleLower = parsedEvent.rule.toLowerCase();
-  
+
   // Check if specific month is mentioned
-  const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
-                     'july', 'august', 'september', 'october', 'november', 'december'];
-  
+  const monthNames = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+
   let targetMonth = 0; // Default to January
   for (let i = 0; i < monthNames.length; i++) {
     if (ruleLower.includes(monthNames[i])) {
@@ -415,24 +510,26 @@ function generateAnnualEvents(
       break;
     }
   }
-  
+
   // Only generate event in the target month
   if (month !== targetMonth) return [];
-  
+
   let day = 1;
   const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?/);
   if (dayMatch) {
     day = parseInt(dayMatch[1]);
   }
-  
-  return [{
-    id: `${index}-${month}`,
-    ruleName: parsedEvent.name,
-    date: new Date(year, month, day),
-    month,
-    year,
-    notes: parsedEvent.description,
-  }];
+
+  return [
+    {
+      id: `${index}-${month}`,
+      ruleName: parsedEvent.name,
+      date: new Date(year, month, day),
+      month,
+      year,
+      notes: parsedEvent.description,
+    },
+  ];
 }
 
 function generateEndOfMonthEvents(
@@ -442,15 +539,17 @@ function generateEndOfMonthEvents(
   index: number
 ): CalendarEvent[] {
   const lastDay = new Date(year, month + 1, 0).getDate();
-  
-  return [{
-    id: `${index}-${month}`,
-    ruleName: parsedEvent.name,
-    date: new Date(year, month, lastDay),
-    month,
-    year,
-    notes: parsedEvent.description,
-  }];
+
+  return [
+    {
+      id: `${index}-${month}`,
+      ruleName: parsedEvent.name,
+      date: new Date(year, month, lastDay),
+      month,
+      year,
+      notes: parsedEvent.description,
+    },
+  ];
 }
 
 function generateOrdinalDayEvents(
@@ -461,15 +560,23 @@ function generateOrdinalDayEvents(
   ordinal: string,
   dayName: string
 ): CalendarEvent[] {
-  const dayMap = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
+  const dayMap = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  };
   const targetDay = dayMap[dayName as keyof typeof dayMap];
-  
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  
+
   let occurrences: Date[] = [];
   let currentDate = new Date(firstDay);
-  
+
   // Find all occurrences of the target day in the month
   while (currentDate <= lastDay) {
     if (currentDate.getDay() === targetDay) {
@@ -477,38 +584,40 @@ function generateOrdinalDayEvents(
     }
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   let targetDate: Date | null = null;
-  
+
   switch (ordinal) {
-    case 'first':
+    case "first":
       targetDate = occurrences[0] || null;
       break;
-    case 'second':
+    case "second":
       targetDate = occurrences[1] || null;
       break;
-    case 'third':
+    case "third":
       targetDate = occurrences[2] || null;
       break;
-    case 'fourth':
+    case "fourth":
       targetDate = occurrences[3] || null;
       break;
-    case 'last':
+    case "last":
       targetDate = occurrences[occurrences.length - 1] || null;
       break;
   }
-  
+
   if (targetDate) {
-    return [{
-      id: `${index}-${month}`,
-      ruleName: parsedEvent.name,
-      date: targetDate,
-      month,
-      year,
-      notes: parsedEvent.description,
-    }];
+    return [
+      {
+        id: `${index}-${month}`,
+        ruleName: parsedEvent.name,
+        date: targetDate,
+        month,
+        year,
+        notes: parsedEvent.description,
+      },
+    ];
   }
-  
+
   return [];
 }
 
@@ -520,37 +629,51 @@ function generateBusinessDayEvents(
 ): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const ruleLower = parsedEvent.rule.toLowerCase();
-  
+
   // If it's a specific business day (like "first business day")
-  if (ruleLower.includes("first business day") || ruleLower.includes("first working day")) {
+  if (
+    ruleLower.includes("first business day") ||
+    ruleLower.includes("first working day")
+  ) {
     const firstBusinessDay = getFirstWorkingDay(year, month);
-    return [{
-      id: `${index}-${month}`,
-      ruleName: parsedEvent.name,
-      date: firstBusinessDay,
-      month,
-      year,
-      notes: parsedEvent.description,
-    }];
+    return [
+      {
+        id: `${index}-${month}`,
+        ruleName: parsedEvent.name,
+        date: firstBusinessDay,
+        month,
+        year,
+        notes: parsedEvent.description,
+      },
+    ];
   }
-  
+
   // If it's "last business day"
-  if (ruleLower.includes("last business day") || ruleLower.includes("last working day")) {
+  if (
+    ruleLower.includes("last business day") ||
+    ruleLower.includes("last working day")
+  ) {
     const lastBusinessDay = getLastWorkingDay(year, month);
-    return [{
-      id: `${index}-${month}`,
-      ruleName: parsedEvent.name,
-      date: lastBusinessDay,
-      month,
-      year,
-      notes: parsedEvent.description,
-    }];
+    return [
+      {
+        id: `${index}-${month}`,
+        ruleName: parsedEvent.name,
+        date: lastBusinessDay,
+        month,
+        year,
+        notes: parsedEvent.description,
+      },
+    ];
   }
-  
+
   // If it's "every business day" or "all business days"
-  if (ruleLower.includes("every business day") || ruleLower.includes("all business days") || ruleLower.includes("every weekday")) {
+  if (
+    ruleLower.includes("every business day") ||
+    ruleLower.includes("all business days") ||
+    ruleLower.includes("every weekday")
+  ) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       if (!isWeekend(date)) {
@@ -565,7 +688,7 @@ function generateBusinessDayEvents(
       }
     }
   }
-  
+
   return events;
 }
 
@@ -603,10 +726,20 @@ function calculateEventDate(
 
     // Month name patterns (e.g., "January 15", "15th of June")
     const monthNames = [
-      'january', 'february', 'march', 'april', 'may', 'june',
-      'july', 'august', 'september', 'october', 'november', 'december'
+      "january",
+      "february",
+      "march",
+      "april",
+      "may",
+      "june",
+      "july",
+      "august",
+      "september",
+      "october",
+      "november",
+      "december",
     ];
-    
+
     for (let i = 0; i < monthNames.length; i++) {
       const monthName = monthNames[i];
       if (ruleLower.includes(monthName)) {
@@ -625,7 +758,9 @@ function calculateEventDate(
     }
 
     // Time-based patterns with dates
-    const timePatternMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?\s+(?:at\s+)?(\d{1,2}):?(\d{0,2})\s*(?:am|pm)?/);
+    const timePatternMatch = ruleLower.match(
+      /(\d+)(?:st|nd|rd|th)?\s+(?:at\s+)?(\d{1,2}):?(\d{0,2})\s*(?:am|pm)?/
+    );
     if (timePatternMatch) {
       const day = parseInt(timePatternMatch[1]);
       if (day >= 1 && day <= new Date(year, month + 1, 0).getDate()) {
@@ -635,26 +770,34 @@ function calculateEventDate(
 
     // Christmas, New Year, and other holidays
     const holidays = {
-      'christmas': [11, 25], // December 25
-      'new year': [0, 1],    // January 1
-      'valentine': [1, 14],  // February 14
-      'halloween': [9, 31],  // October 31
-      'independence day': [6, 4] // July 4
+      christmas: [11, 25], // December 25
+      "new year": [0, 1], // January 1
+      valentine: [1, 14], // February 14
+      halloween: [9, 31], // October 31
+      "independence day": [6, 4], // July 4
     };
-    
-    for (const [holidayName, [holidayMonth, holidayDay]] of Object.entries(holidays)) {
+
+    for (const [holidayName, [holidayMonth, holidayDay]] of Object.entries(
+      holidays
+    )) {
       if (ruleLower.includes(holidayName) && month === holidayMonth) {
         return new Date(year, month, holidayDay);
       }
     }
 
     // First working day
-    if (ruleLower.includes("first working day") || ruleLower.includes("first business day")) {
+    if (
+      ruleLower.includes("first working day") ||
+      ruleLower.includes("first business day")
+    ) {
       return getFirstWorkingDay(year, month);
     }
 
     // Last working day
-    if (ruleLower.includes("last working day") || ruleLower.includes("last business day")) {
+    if (
+      ruleLower.includes("last working day") ||
+      ruleLower.includes("last business day")
+    ) {
       return getLastWorkingDay(year, month);
     }
 
@@ -676,12 +819,18 @@ function calculateEventDate(
     // Simple day number patterns
     for (let day = 1; day <= 31; day++) {
       const patterns = [
-        `${day}st`, `${day}nd`, `${day}rd`, `${day}th`,
-        ` ${day} `, `^${day} `, ` ${day}$`, `^${day}$`
+        `${day}st`,
+        `${day}nd`,
+        `${day}rd`,
+        `${day}th`,
+        ` ${day} `,
+        `^${day} `,
+        ` ${day}$`,
+        `^${day}$`,
       ];
-      
+
       for (const pattern of patterns) {
-        const regex = new RegExp(pattern.replace(/\^|\$/g, ''), 'i');
+        const regex = new RegExp(pattern.replace(/\^|\$/g, ""), "i");
         if (regex.test(` ${ruleLower} `)) {
           if (day <= new Date(year, month + 1, 0).getDate()) {
             return new Date(year, month, day);
@@ -716,8 +865,12 @@ function calculateEventDate(
     }
 
     // January-only events
-    if (ruleLower.includes("first month") || ruleLower.includes("only in january")) {
-      if (month === 0) { // January
+    if (
+      ruleLower.includes("first month") ||
+      ruleLower.includes("only in january")
+    ) {
+      if (month === 0) {
+        // January
         const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?/);
         if (dayMatch) {
           const day = parseInt(dayMatch[1]);
@@ -728,8 +881,9 @@ function calculateEventDate(
     }
 
     // General patterns
-    const dayMatch = ruleLower.match(/(\d+)(?:st|nd|rd|th)?\s+of\s+every\s+month/) ||
-                    ruleLower.match(/every\s+(\d+)(?:st|nd|rd|th)?/);
+    const dayMatch =
+      ruleLower.match(/(\d+)(?:st|nd|rd|th)?\s+of\s+every\s+month/) ||
+      ruleLower.match(/every\s+(\d+)(?:st|nd|rd|th)?/);
     if (dayMatch) {
       const day = parseInt(dayMatch[1]);
       if (day >= 1 && day <= new Date(year, month + 1, 0).getDate()) {
@@ -744,79 +898,6 @@ function calculateEventDate(
         const day = parseInt(runsDayMatch[1]);
         if (day >= 1 && day <= new Date(year, month + 1, 0).getDate()) {
           const date = new Date(year, month, day);
-          if (ruleLower.includes("previous friday") && isWeekend(date)) {
-            return getPreviousFriday(date);
-          }
-          return date;
-        }
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.warn(`Could not parse rule: ${rule}`, error);
-    return null;
-  }
-}
-      }
-      return date;
-    }
-
-    // 13th with weekend handling
-    if (ruleLower.includes("13th") && ruleLower.includes("next working day")) {
-      const date = new Date(year, month, 13);
-      if (isWeekend(date)) {
-        return getNextWorkingDay(date);
-      }
-      return date;
-    }
-
-    // 15th (no shifting)
-    if (ruleLower.includes("15th")) {
-      return new Date(year, month, 15);
-    }
-
-    // 19th (no shifting)
-    if (ruleLower.includes("19th")) {
-      return new Date(year, month, 19);
-    }
-
-    // January-only events
-    if (
-      ruleLower.includes("first month") ||
-      ruleLower.includes("only in january")
-    ) {
-      if (month === 0) {
-        // January
-        if (ruleLower.includes("9th") || ruleLower.includes("9 ")) {
-          return new Date(year, month, 9);
-        }
-        if (ruleLower.includes("23rd") || ruleLower.includes("23 ")) {
-          return new Date(year, month, 23);
-        }
-      }
-      return null; // Skip for other months
-    }
-
-    // General day patterns with "of every month" or "every [day]"
-    const dayMatch =
-      ruleLower.match(/(\d+)(?:st|nd|rd|th)?\s+of\s+every\s+month/) ||
-      ruleLower.match(/every\s+(\d+)(?:st|nd|rd|th)?/);
-    if (dayMatch) {
-      const day = parseInt(dayMatch[1]);
-      if (day >= 1 && day <= 31) {
-        return new Date(year, month, day);
-      }
-    }
-
-    // Catch "runs every" patterns
-    if (ruleLower.includes("runs every")) {
-      const runsDayMatch = ruleLower.match(/runs every (\d+)(?:st|nd|rd|th)?/);
-      if (runsDayMatch) {
-        const day = parseInt(runsDayMatch[1]);
-        if (day >= 1 && day <= 31) {
-          const date = new Date(year, month, day);
-          // Apply weekend shifting if mentioned
           if (ruleLower.includes("previous friday") && isWeekend(date)) {
             return getPreviousFriday(date);
           }
