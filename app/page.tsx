@@ -34,7 +34,17 @@ export default function Home() {
   };
 
   const handleDownloadPDF = () => {
-    generatePDF(events, year);
+    // Ensure we use the latest events by regenerating from current formData
+    if (formData) {
+      const latestParsedEvents = parseEventsText(formData.eventsText);
+      const latestEvents = generateCalendarEvents(
+        latestParsedEvents,
+        formData.year
+      );
+      generatePDF(latestEvents, formData.year, formData);
+    } else {
+      generatePDF(events, year);
+    }
   };
 
   const handleDownloadCSV = () => {
@@ -47,9 +57,23 @@ export default function Home() {
 
   const handlePreviewPDF = async () => {
     try {
+      // Ensure we use the latest events by regenerating from current formData
+      let eventsToUse = events;
+      let yearToUse = year;
+
+      if (formData) {
+        const latestParsedEvents = parseEventsText(formData.eventsText);
+        eventsToUse = generateCalendarEvents(latestParsedEvents, formData.year);
+        yearToUse = formData.year;
+      }
+
       // Generate PDF as blob instead of downloading
       const { generatePDFBlob } = await import("@/lib/pdfGenerator");
-      const pdfBlob = generatePDFBlob(events, year);
+      const pdfBlob = generatePDFBlob(
+        eventsToUse,
+        yearToUse,
+        formData || undefined
+      );
       const url = URL.createObjectURL(pdfBlob);
       setPdfPreviewUrl(url);
       setShowPreview(true);
@@ -229,16 +253,31 @@ export default function Home() {
                 <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-400 mx-auto rounded-full"></div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 12 }, (_, month) => {
-                  const monthEvents = events.filter((e) => e.month === month);
+              <div className="space-y-8">
+                {Array.from({ length: 6 }, (_, rowIndex) => {
+                  const monthIndex1 = rowIndex * 2;
+                  const monthIndex2 = rowIndex * 2 + 1;
                   return (
-                    <div key={month}>
-                      <CalendarGrid
-                        month={month}
-                        year={year}
-                        events={monthEvents}
-                      />
+                    <div
+                      key={rowIndex}
+                      className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+                    >
+                      {/* First month */}
+                      <div className="w-full">
+                        <CalendarGrid
+                          month={monthIndex1}
+                          year={year}
+                          events={events.filter((e) => e.month === monthIndex1)}
+                        />
+                      </div>
+                      {/* Second month */}
+                      <div className="w-full">
+                        <CalendarGrid
+                          month={monthIndex2}
+                          year={year}
+                          events={events.filter((e) => e.month === monthIndex2)}
+                        />
+                      </div>
                     </div>
                   );
                 })}
